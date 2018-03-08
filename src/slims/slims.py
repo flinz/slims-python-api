@@ -368,6 +368,12 @@ class Record(object):
         Returns:
             The primary key of this record
         """
+
+        # If this is a field, return tbfl_pk instead
+        # since pk is Null
+        if self.table_name() == "Field":
+            return self.tbfl_pk.value
+
         return self.json_entity["pk"]
 
     def attachments(self):
