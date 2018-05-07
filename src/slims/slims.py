@@ -52,8 +52,14 @@ class _SlimsApi(object):
         self.repo_location = repo_location
 
     def get_entities(self, url, body=None):
+
         if not url.startswith(self.url):
-            url = self.url + url
+
+            # fix wrongly returned links - api returns http but we need https
+            if url.startswith("http"):
+                url = url.replace('http', 'https')
+            else:
+                url = self.url + url
 
         response = requests.get(url,
                                 auth=(self.username, self.password),
@@ -203,7 +209,7 @@ class Slims(object):
         else:
             return None
 
-    def add(self, table, values):
+    def add(self, table, values, debug=False):
         """ Add a new record in slims
 
         Args:
@@ -223,7 +229,11 @@ class Slims(object):
             Adds a content record with id "ID" in status pending with the content type
             with primary key 1
         """
-        response = self.slims_api.put(url=table, body=values).json()
+        response = self.slims_api.put(url=table, body=values)
+        if debug:
+            with open('response.html', 'w') as f:
+                f.write(str(response.content))
+        response = response.json()
         new_values = response["entities"][0]
         return Record(new_values, self.slims_api)
 
